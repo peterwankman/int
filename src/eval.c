@@ -298,10 +298,9 @@ static int evalparen(char* exp, int** result, int** pos, int** len, int *status)
 		}
 	}
 
-	*result = malloc(n * sizeof(int));
+	if(n) *result = malloc(n * sizeof(int));
 	
 	for(i = 0; i < n; i++) {
-		
 		if((subexp = malloc((*len)[i] - 1)) == NULL) {
 			*status = ERROR_MALLC;
 			return 0;
@@ -375,6 +374,9 @@ int eval(char *exp, int *status) {
 		if(*status != ERROR_NONE)
 			return 0;
 		free(buf);
+		free(resultpar);
+		free(pospar);	
+		free(lenpar);
 		buf = buf2;
 	}
 
