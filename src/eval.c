@@ -161,16 +161,20 @@ static expr_t *buildtree(char *exp, int *status) {
 	int opr, oprpos;
 	char *left, *right;
 	expr_t *tree_left, *tree_right;
-	expr_t *out;
+	expr_t *out = NULL;
 
 	*status = ERROR_NONE;
 		
 	if(isint(exp))
-		return makenum(atoi(exp));
-	if(isvar(exp))
-		return makenum(getint(exp, status));
-	if(isarray(exp))
-		return makenum(getintarr(exp, status));
+		out = makenum(atoi(exp));
+	else if(isvar(exp))
+		out = makenum(getint(exp, status));
+	else if(isarray(exp))
+		out = makenum(getintarr(exp, status));
+	if(*status != ERROR_NONE)
+			return NULL; 
+	if(out)
+		return out;
 	
 	opr = getoper(exp, &oprpos);
 	if(oprpos < 1) {				/* CHECK FOR UNARY '-' */
@@ -406,3 +410,4 @@ int eval(char *exp, int *status) {
 
 	return ret;
 }
+
