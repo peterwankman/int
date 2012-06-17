@@ -124,20 +124,33 @@ static int getoper(char *exp, int *pos) {
 	return ret;
 }
 
-static char *getoperand(char *exp, int pos, int lr) {
+static char *getoperand(char *exp, int pos, int lr, int *status) {
 	char *ret;
 	int len;
 
-	if(lr == OPER_LEFT) {		
-		if((ret = malloc(pos + 1)) == NULL)
+	if(lr == OPER_LEFT) {
+		len = pos + 1;
+		if(len == 1) {
+			*status = ERROR_SYNTX;
 			return NULL;
+		}
+		if((ret = malloc(len)) == NULL) {
+			*status = ERROR_MALLC;
+			return NULL;
+		}
 		strncpy(ret, exp, pos);
 		ret[pos] = '\0';
 	} else {
 		len = strlen(exp) - pos;
-		if((ret = malloc(len + 1)) == NULL)
+		if(len == 1) {
+			*status = ERROR_SYNTX;
 			return NULL;
-		strncpy(ret, exp + pos + 1, len);
+		}
+		if((ret = malloc(len)) == NULL) {
+			*status = ERROR_MALLC;
+			return NULL;
+		}
+		strncpy(ret, exp + pos + 1, len - 1);
 		ret[len] = '\0';
 	}
 
@@ -162,9 +175,10 @@ static expr_t *buildtree(char *exp, int *status) {
 	opr = getoper(exp, &oprpos);
 	if(oprpos < 1) {				/* CHECK FOR UNARY '-' */
 		if((oprpos == 0) && (operlist[opr][1] == OPER_SUB)) {
-			right = getoperand(exp, oprpos, OPER_RIGHT);
+			if((right = getoperand(exp, oprpos, OPER_RIGHT, status)) == NULL)
+				return NULL;
 
-			if(right && (tree_right = buildtree(right, status)) == NULL)
+			if((tree_right = buildtree(right, status)) == NULL)
 				return NULL;
 
 			out = makeoper(OPER_SUB, makenum(0), tree_right);
@@ -175,26 +189,28 @@ static expr_t *buildtree(char *exp, int *status) {
 		return NULL;		
 	}
 
-	left = getoperand(exp, oprpos, OPER_LEFT);
-	right = getoperand(exp, oprpos, OPER_RIGHT);
+	left = getoperand(exp, oprpos, OPER_LEFT, status);
+	right = getoperand(exp, oprpos, OPER_RIGHT, status);
 
 	if(left && right) {
 		if((tree_left = buildtree(left, status)) == NULL) {
+			free(left);
+			free(right);
 			return NULL;
 		}
 		if((tree_right = buildtree(right, status)) == NULL) {
+			free(left);
+			free(right);
 			return NULL;
 		}
 		out = makeoper(operlist[opr][1], tree_left, tree_right);
 		free(left);
 		free(right);
 		return out;
-	}
-	else {
+	} else {
 		if(left) free(left);
 		if(right) free(right);
-		*status = ERROR_MALLC;
-		return NULL; /* SET STATUS! */
+		return NULL;
 	}
 }
 
