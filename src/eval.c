@@ -357,7 +357,7 @@ static char *buildnewexp(char* exp, int num, int* result, int* pos, int* len, in
 		if(i == pos[n]) {
 			sprintf(out, "%s%d", out, result[n]);
 			i += len[n] - 1;
-			if(n < num)
+			if(n < (num - 1))
 				n++;
 		} else {			
 			out[strlen(out)] = exp[i];
