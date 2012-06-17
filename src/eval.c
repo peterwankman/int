@@ -151,7 +151,7 @@ static char *getoperand(char *exp, int pos, int lr, int *status) {
 			return NULL;
 		}
 		strncpy(ret, exp + pos + 1, len - 1);
-		ret[len] = '\0';
+		ret[len - 1] = '\0';
 	}
 
 	return ret;
