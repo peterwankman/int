@@ -303,8 +303,10 @@ int setintarr(char *arrstr, char *exp, int *status) {
 	free(ident);
 
 	arr = var->val.array;
-	if(arr.size < subs + 1)
-		return ERROR_SUBST;
+	if(arr.size < subs + 1) {
+		*status = ERROR_SUBST;
+		return 0;
+	}
 
 	i = eval(exp, status);
 	arr.val.integer[subs] = i;
