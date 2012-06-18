@@ -168,7 +168,7 @@ char *setstr(char *ident, char *str, int *status) {
     } else {
         var = mknewvar(ident, 0, str, 0);
 		if(var == NULL)
-			*status = ERROR_SUBST; // ASDF
+			*status = ERROR_SUBST; /* ASDF */
         addtovarlist(var);
     }
 	
@@ -197,7 +197,7 @@ char *setstrarr(char *arrstr, char *str, int *status) {
 	}
 
 	if((ident = realloc(ident, strlen(str) + 1)) == NULL) { /* var reuse */
-		*status = ERROR_MALLC; // ASDF
+		*status = ERROR_MALLC; /* ASDF */
 		return NULL;
 	}
 
@@ -260,7 +260,7 @@ int dimstr(char *ident, int size, int *status) {
     var = mknewvar(ident, 0, "", size);
 
 	if(var == NULL) {
-		*status = ERROR_REDIM; // ASDF
+		*status = ERROR_REDIM; /* ASDF */
 		return 0;
 	}
     addtovarlist(var);
@@ -279,7 +279,7 @@ int setint(char *ident, char *exp, int *status) {
     } else {
         var = mknewvar(ident, i, NULL, 0);
 		if(var == NULL)
-			*status = ERROR_REDIM; // ASDF
+			*status = ERROR_REDIM; /* ASDF */
         addtovarlist(var);
     }
 
