@@ -52,7 +52,16 @@ static int getoper(char *exp, int *pos) {
 		if(c == '(')
 			skip--;
 
-		if((skip == 0) && (oper = isoper(exp[i])) > -1) {
+		oper = isoper(exp[i]);
+		if((skip == 0) && (oper > -1)) {
+			/* Unary - */
+			if((operlist[oper][1] == OPER_SUB) &&
+				((i == 0) || (isoper(exp[i - 1]) > -1)) &&
+				(operlist[oper][2] < lowest)) {
+					*pos = (i == 0)?0:i - 1;
+					return (i == 0)?OPER_SUB:isoper(exp[i - 1]);
+			}
+			/* Binary operator*/
 			if(operlist[oper][2] < lowest) {
 				lowest = operlist[oper][2];
 				*pos = i;
@@ -122,21 +131,6 @@ static expr_t *buildtree(char *exp, int *status) {
 		return out;
 	
 	opr = getoper(exp, &oprpos);
-	if(oprpos < 1) {				/* CHECK FOR UNARY '-' */
-		if((oprpos == 0) && (operlist[opr][1] == OPER_SUB)) {
-			if((right = getoperand(exp, oprpos, OPER_RIGHT, status)) == NULL)
-				return NULL;
-
-			if((tree_right = buildtree(right, status)) == NULL)
-				return NULL;
-
-			out = makeoper(OPER_SUB, makenum(0), tree_right);
-			free(right);
-			return out;
-		}
-		*status = ERROR_SYNTX;
-		return NULL;		
-	}
 
 	left = getoperand(exp, oprpos, OPER_LEFT, status);
 	right = getoperand(exp, oprpos, OPER_RIGHT, status);

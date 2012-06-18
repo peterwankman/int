@@ -41,16 +41,18 @@ int isoper(char c) {
 }
 
 int isint(char *exp) {
-	int i;
-	for(i = 0; i < strlen(exp); i++)
+	int i = 0;
+	if(exp[0] == '-') i++;
+	for(; i < strlen(exp); i++)
 		if((exp[i] < '0') || (exp[i] > '9'))
 			return 0;
 	return 1;
 }
 
 int isdec(char *exp) {
-	int i, dot=0;
-	for(i = 0; i < strlen(exp); i++) {
+	int i = 0, dot = 0;
+	if(exp[0] == '-') i++;
+	for(; i < strlen(exp); i++) {
 		if(exp[i] == '.')
 			dot++;
 		else if((exp[i] < '0') || (exp[i] > '9'))
