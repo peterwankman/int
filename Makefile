@@ -18,6 +18,9 @@ $(OBJ)/var.o: $(SRC)/var.c
 $(OBJ)/help.o: $(SRC)/help.c
 	$(CC) $(CFLAGS) -c -o $@ $^
 
+$(OBJ)/oper.o: $(SRC)/oper.c
+	$(CC) $(CFLAGS) -c -o $@ $^
+
 .PHONY: all clean
 
 all:

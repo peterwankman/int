@@ -37,61 +37,6 @@ static expr_t *makeoper(int op, expr_t *left, expr_t *right) {
 	return out;
 }
 
-static int isint(char *exp) {
-	int i;
-	for(i = 0; i < strlen(exp); i++)
-		if((exp[i] < '0') || (exp[i] > '9'))
-			return 0;
-	return 1;
-}
-
-static int isvar(char *exp) {
-	int i;
-	for(i = 0; i < strlen(exp); i++)
-		if((exp[i] < 'A') || (exp[i] > 'Z'))
-			return 0;
-	return 1;
-}
-
-static int isarray(char *exp) {
-	char *oparen, *c;
-	int parbal = 0;
-
-	if((oparen = strchr(exp, '(')) == NULL)		
-		return 0;
-
-	if(oparen == exp)
-		return 0;
-
-	c = oparen;
-	do {
-		if(*c == '(')
-			parbal++;
-		if(*c == ')')
-			parbal--;
-		c++;
-	} while(parbal && *c);
-
-	if(*c)
-		return 0;
-	
-	for(c = exp; c < oparen; c++)
-		if ((*c < 'A') || (*c > 'Z'))
-			return 0;
-	
-	return 1;
-}
-
-static int isoper(char c) {
-	int i;
-
-	for(i = 0; i < NUM_OPER; i++) {
-		if(operlist[i][0] == c)
-			return i;
-	}
-	return -1;
-}
-
 static int getoper(char *exp, int *pos) {
 	int len = strlen(exp);
 	int i, oper, skip = 0, ret = ERROR_SYNTX;
@@ -167,9 +112,9 @@ static expr_t *buildtree(char *exp, int *status) {
 		
 	if(isint(exp))
 		out = makenum(atoi(exp));
-	else if(isvar(exp))
+	else if(isscalar(getvartype(exp)))
 		out = makenum(getint(exp, status));
-	else if(isarray(exp))
+	else if(isarray(getvartype(exp)))
 		out = makenum(getintarr(exp, status));
 	if(*status != ERROR_NONE)
 			return NULL; 
@@ -267,7 +212,7 @@ static int evalparen(char* exp, int** result, int** pos, int** len, int *status)
 			if((i > 0) && (exp[i - 1] == '$')) {
 				*status = ERROR_TYPE;
 				return 0;
-			} else if((i > 0) && (isalpha(exp[i - 1]))) {				
+			} else if((i > 0) && ((isalpha(exp[i - 1]) || exp[i - 1] == '%'))) {
 				nest = 1;
 				while(nest && (i < strlen(exp))) {
 					i++;

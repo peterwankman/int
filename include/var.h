@@ -1,7 +1,12 @@
 #ifndef VAR_H_
 #define VAR_H_
 
-typedef enum { integer, intarr, string, strarr, err } vartype_t;
+typedef enum {
+	decimal, decarr,
+	integer, intarr, 
+	string, strarr, 
+	err
+} vartype_t;
 
 typedef struct {
 	vartype_t type;
@@ -10,6 +15,7 @@ typedef struct {
 	union {
 		char **string;
 		int *integer;
+		float *decimal;
 	} val;
 } array_t;
 

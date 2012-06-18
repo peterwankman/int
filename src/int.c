@@ -10,27 +10,6 @@
 
 #define MAXBUF 8
 
-vartype_t getvartype(char *var) {
-	int i;
-	char c = var[strlen(var) - 1];
-
-	for(i = 0; i < strlen(var) - 1; i++) {
-		if((i > 0) && (var[i] == '(') && isalpha(var[i - 1]))
-			return intarr;
-		if((var[i] == '$') && (var[i + 1] == '('))
-			return strarr;
-		if(!isalpha(var[i]))
-			return err;
-	}
-	
-	if(c == '$')
-		return string;
-	else if(isalpha(c) || (c == '%'))
-		return integer;
-	else
-		return err;
-}
-
 void exec(char *cmd) {
 	char *buf, *var;
 	int status = ERROR_CMMND;
@@ -69,7 +48,6 @@ void exec(char *cmd) {
 			strncpy(var, cmd, buf - cmd + 1);
 
 			type = getvartype(var);
-			
 			if(type == intarr)
 				setintarr(var, buf, &status);
 			else if(type == integer)
@@ -88,8 +66,7 @@ void exec(char *cmd) {
 	} else if(!strncmp(cmd, "PRINT ", 6)) {
 		cmd += 6;
 
-		type = getvartype(cmd);			
-
+		type = getvartype(cmd);
 		if(type == strarr)
 			printf(" %s\n", getstrarr(cmd, &status));
 		else if(type == string)
