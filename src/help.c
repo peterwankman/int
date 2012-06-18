@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "errno.h"
+#include "errlist.h"
 
 void strtoup(char *in) {
 	do {

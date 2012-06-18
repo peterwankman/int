@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include "errno.h"
+#include "errlist.h"
 #include "eval.h"
 #include "help.h"
 #include "oper.h"
