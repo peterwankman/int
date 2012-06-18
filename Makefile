@@ -6,8 +6,6 @@ BIN=bin
 CC=gcc
 CFLAGS=-I$(INC) -ggdb -O0 -Wall -pedantic -ansi -Wextra -fno-omit-frame-pointer
 
-all: $(BIN)/int
-
 $(BIN)/int: $(OBJ)/help.o $(OBJ)/eval.o $(OBJ)/var.o $(SRC)/int.c
 	$(CC) $(CFLAGS) -o $@ $^
 
@@ -19,6 +17,11 @@ $(OBJ)/var.o: $(SRC)/var.c
 
 $(OBJ)/help.o: $(SRC)/help.c
 	$(CC) $(CFLAGS) -c -o $@ $^
+
+.PHONY: all clean
+
+all:
+	make $(BIN)/int
 
 clean:
 	rm -f $(OBJ)/*
