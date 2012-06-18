@@ -364,7 +364,11 @@ int dimint(char *ident, int size, int *status) {
 	}
 
     var = mknewvar(ident, 0, NULL, size);
-    addtovarlist(var);
+	if(!var) {
+		*status = ERROR_MALLC;
+		return 0;
+	}
+	addtovarlist(var);
 
 	*status = ERROR_NONE;
     return 1;
