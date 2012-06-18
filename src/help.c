@@ -16,14 +16,14 @@ void printstatus(int status) {
 	printf(" ");
 	switch(status) {
 		case ERROR_NONE:  printf("OK.\n"); break;
-		case ERROR_SYNTX: printf("Syntax error.\n"); break;
-		case ERROR_REDIM: printf("Array redimensioned.\n"); break;
-		case ERROR_SUBST: printf("Bad subscript.\n"); break;
-		case ERROR_TYPE:  printf("Type mismatch.\n"); break;
-		case ERROR_DIVZE: printf("Division by zero.\n"); break;
-		case ERROR_MALLC: printf("malloc() failed.\n"); break;
-		case ERROR_CMMND: printf("Unknown command.\n"); break;
-		default:		  printf("unknown error.\n");
+		case ERROR_SYNTX: printf("ERROR: Syntax error.\n"); break;
+		case ERROR_REDIM: printf("ERROR: Array redimensioned.\n"); break;
+		case ERROR_SUBST: printf("ERROR: Bad subscript.\n"); break;
+		case ERROR_TYPE:  printf("ERROR: Type mismatch.\n"); break;
+		case ERROR_DIVZE: printf("ERROR: Division by zero.\n"); break;
+		case ERROR_MALLC: printf("ERROR: malloc() failed.\n"); break;
+		case ERROR_CMMND: printf("ERROR: Unknown command.\n"); break;
+		default:		  printf("ERROR: unknown error.\n");
 	}
 }
 
