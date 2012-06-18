@@ -4,25 +4,25 @@
 typedef enum { integer, intarr, string, strarr, err } vartype_t;
 
 typedef struct {
-    vartype_t type;
-    int size;
+	vartype_t type;
+	int size;
 
-    union {
-        char **string;
-        int *integer;
-    } val;
+	union {
+		char **string;
+		int *integer;
+	} val;
 } array_t;
 
 typedef struct varentry_t {
-    char *ident;
-    vartype_t type;
-    struct varentry_t *next;
+	char *ident;
+	vartype_t type;
+	struct varentry_t *next;
 
-    union {
-        int integer;
-        char *string;
-        array_t array;
-    } val;
+	union {
+		int integer;
+		char *string;
+		array_t array;
+	} val;
 } varentry_t;
 
 varentry_t *varlist;

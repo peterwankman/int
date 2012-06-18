@@ -106,7 +106,7 @@ int main(void) {
 	char buf[MAXBUF];
 	char *cmd = NULL;
 
-    newvarlist();
+	newvarlist();
 
 	do {
 		size = 0;
@@ -135,6 +135,6 @@ int main(void) {
 	} while(1);
 	free(cmd);
 
-    freevarlist();
+	freevarlist();
 	return EXIT_SUCCESS;
 }
