@@ -4,7 +4,9 @@ OBJ=objects
 BIN=bin
 
 CC=gcc
-CFLAGS=-I$(INC) -ggdb -O0 -Wall
+CFLAGS=-I$(INC) -ggdb -O0 -Wall -pedantic -ansi -Wextra -fno-omit-frame-pointer
+
+all: $(BIN)/int
 
 $(BIN)/int: $(OBJ)/help.o $(OBJ)/eval.o $(OBJ)/var.o $(SRC)/int.c
 	$(CC) $(CFLAGS) -o $@ $^
