@@ -231,16 +231,19 @@ static int evaltree(expr_t *tree, int *status) {
 		case OPER_ADD: return left + right;
 		case OPER_SUB: return left - right;
 		case OPER_MUL: return left * right;
-		case OPER_MOD: return left % right;
 		case OPER_AND: return left & right;
 		case OPER_XOR: return left ^ right;
 		case OPER_OR:  return left | right;
 		case OPER_DIV:
-			if(right != 0)
-				return left / right;
-			else
+		case OPER_MOD:
+			if(right != 0) {
+				if(tree->val == OPER_DIV)
+					return left / right;
+				else if(tree->val == OPER_MOD)
+					return left % right;
+			} else
 				*status = ERROR_DIVZE;
-		default: return 0;
+		default: *status = ERROR_SYNTX; return 0;
 	}
 }
 
