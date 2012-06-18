@@ -31,21 +31,21 @@ vartype_t getvartype(char *var) {
 }
 
 int isoper(char c) {
-    int i;
+	int i;
 
-    for(i = 0; i < NUM_OPER; i++) {
-        if(operlist[i][0] == c)
-            return i;
-    }
-    return -1;
+	for(i = 0; i < NUM_OPER; i++) {
+		if(operlist[i][0] == c)
+			return i;
+	}
+	return -1;
 }
 
 int isint(char *exp) {
-    int i;
-    for(i = 0; i < strlen(exp); i++)
-        if((exp[i] < '0') || (exp[i] > '9'))
-            return 0;
-    return 1;
+	int i;
+	for(i = 0; i < strlen(exp); i++)
+		if((exp[i] < '0') || (exp[i] > '9'))
+			return 0;
+	return 1;
 }
 
 int isdec(char *exp) {
