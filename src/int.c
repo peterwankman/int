@@ -44,7 +44,7 @@ void exec(char *cmd) {
 			buf++;
 
 			var = malloc(buf - cmd + 1);
-			strcpy(var, cmd);
+			strncpy(var, cmd, buf - cmd + 1);
 
 			type = getvartype(var);
 			if(type == integer)
@@ -66,7 +66,7 @@ void exec(char *cmd) {
 			buf++;
 
 			var = malloc(buf - cmd + 1);
-			strcpy(var, cmd);
+			strncpy(var, cmd, buf - cmd + 1);
 
 			type = getvartype(var);
 			

@@ -77,7 +77,7 @@ static varentry_t *mknewvar(char *ident, int val, char *str, int size) {
 		return NULL;
 	}
 
-	strcpy(out->ident, ident);
+	strncpy(out->ident, ident, strlen(ident) + 1);
 
 	if(str == NULL) {
 		if(size == 0) {
@@ -102,7 +102,7 @@ static varentry_t *mknewvar(char *ident, int val, char *str, int size) {
 				free(out);
 				return NULL;
 			}
-			strcpy(out->val.string, str);
+			strncpy(out->val.string, str, strlen(str) + 1);
 		} else {
 			if((out->val.array.val.string = malloc(size * sizeof(char**))) == NULL) {
 				free(out);
@@ -120,7 +120,7 @@ static varentry_t *mknewvar(char *ident, int val, char *str, int size) {
 					free(out);
 					return NULL;
 				}
-				strcpy(out->val.array.val.string[i], "");
+				strncpy(out->val.array.val.string[i], "", 1);
 			}
 		}
 	}
@@ -162,7 +162,7 @@ char *setstr(char *ident, char *str, int *status) {
 			*status = ERROR_MALLC;
 			return NULL;
 		}
-		strcpy(newstr, str);
+		strncpy(newstr, str, strlen(str) + 1);
 		free(var->val.string);
 		var->val.string = newstr;
 	} else {
@@ -201,7 +201,7 @@ char *setstrarr(char *arrstr, char *str, int *status) {
 		return NULL;
 	}
 
-	strcpy(ident, str);
+	strncpy(ident, str, strlen(str) + 1);
 	free(arr.val.string[subs]);
 	arr.val.string[subs] = ident;
 
