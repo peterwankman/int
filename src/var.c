@@ -538,7 +538,9 @@ void freevarlist(void) {
 		free(varlist->ident);
 		if(varlist->type == string) {
 			free(varlist->val.string);
-		} else if ((varlist->type == strarr) || (varlist->type == intarr)) {
+		} else if  ((varlist->type == strarr) ||
+					(varlist->type == intarr) ||
+					(varlist->type == decarr)) {
 			freearr(varlist->val.array);
 		}
 		next = varlist->next;
