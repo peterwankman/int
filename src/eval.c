@@ -70,10 +70,8 @@ static int getoper(char *exp, int *pos) {
 		}
 	}
 
-	if(skip != 0) {
-		ret = ERROR_SYNTX;
-		*pos = -1;
-	}
+	if(skip != 0)
+		ret = *pos = -1;
 
 	return ret;
 }
@@ -131,7 +129,10 @@ static expr_t *buildtree(char *exp, int *status) {
 		return out;
 	
 	opr = getoper(exp, &oprpos);
-
+	if(opr < 0) {
+		*status = ERROR_SYNTX;
+		return NULL;
+	}
 	left = getoperand(exp, oprpos, OPER_LEFT, status);
 	right = getoperand(exp, oprpos, OPER_RIGHT, status);
 
