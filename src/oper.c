@@ -10,4 +10,3 @@ int operlist[NUM_OPER][3] = {
 	'^', OPER_XOR, 4,
 	'|', OPER_OR, 5
 };
-

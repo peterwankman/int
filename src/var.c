@@ -38,7 +38,7 @@ static int evalsubs(char *array, char **ident, int *subs, int *status) {
 	subsstr++;
 	subsstr[len] = '\0';
 		
-	*subs = eval(subsstr, status);
+	*subs = (int)eval(subsstr, status);
 	if(*status != ERROR_NONE) {
 		free(*ident);
 		return 0;
@@ -65,7 +65,7 @@ static varentry_t *findlastvar(void) {
 	return curr;
 }
 
-static varentry_t *mknewvar(char *ident, int val, char *str, int size) {
+static varentry_t *mknewvar(char *ident, float dval, int ival, char *str, int size, vartype_t type) {
 	varentry_t *out;
 	int i, j;
 
@@ -79,23 +79,18 @@ static varentry_t *mknewvar(char *ident, int val, char *str, int size) {
 
 	strncpy(out->ident, ident, strlen(ident) + 1);
 
-	if(str == NULL) {
-		if(size == 0) {
+	switch(type) {
+		case integer:
 			out->type = integer;
-			out->val.integer = val;
-		} else {
-			if((out->val.array.val.integer = malloc(size * sizeof(int))) == NULL) {
-				free(out);
-				return NULL;
-			}
-			out->type = intarr;
-			out->val.array.type = integer;
-			out->val.array.size = size;
-			for(i = 0; i < size; i++)
-				out->val.array.val.integer[i] = val;
-		}
-	} else {
-		if(size == 0) {
+			out->val.integer = ival;
+			break;
+
+		case decimal:			
+			out->type = decimal;
+			out->val.decimal = dval;
+			break;
+
+		case string:
 			out->type = string;
 			if((out->val.string = malloc(strlen(str) + 1)) == NULL) {
 				free(out->ident);
@@ -103,11 +98,41 @@ static varentry_t *mknewvar(char *ident, int val, char *str, int size) {
 				return NULL;
 			}
 			strncpy(out->val.string, str, strlen(str) + 1);
-		} else {
+			break;
+		
+		case intarr:
+			out->type = intarr;
+			out->val.array.type = integer;
+			out->val.array.size = size;
+
+			if((out->val.array.val.integer = malloc(size * sizeof(int))) == NULL) {
+				free(out);
+				return NULL;
+			}
+			
+			for(i = 0; i < size; i++)
+				out->val.array.val.integer[i] = ival;
+			break;
+
+		case decarr:
+			out->type = decarr;
+			out->val.array.type = decimal;
+			out->val.array.size = size;
+
+			if((out->val.array.val.decimal = malloc(size * sizeof(int))) == NULL) {
+				free(out);
+				return NULL;
+			}
+			
+			for(i = 0; i < size; i++)
+				out->val.array.val.decimal[i] = dval;
+			break;
+
+		case strarr:
 			if((out->val.array.val.string = malloc(size * sizeof(char**))) == NULL) {
 				free(out);
 				return NULL;
-							}
+			}
 			out->type = strarr;
 			out->val.array.type = string;
 			out->val.array.size = size;
@@ -122,8 +147,8 @@ static varentry_t *mknewvar(char *ident, int val, char *str, int size) {
 				}
 				strncpy(out->val.array.val.string[i], "", 1);
 			}
-		}
-	}
+			break;
+	}	
 	out->next = NULL;
 
 	return out;
@@ -166,7 +191,7 @@ char *setstr(char *ident, char *str, int *status) {
 		free(var->val.string);
 		var->val.string = newstr;
 	} else {
-		var = mknewvar(ident, 0, str, 0);
+		var = mknewvar(ident, 0, 0, str, 0, string);
 		if(var == NULL)
 			*status = ERROR_SUBST; /* ASDF */
 		addtovarlist(var);
@@ -257,7 +282,7 @@ int dimstr(char *ident, int size, int *status) {
 		*status = ERROR_REDIM;
 		return 0;
 	}
-	var = mknewvar(ident, 0, "", size);
+	var = mknewvar(ident, 0, 0, "", size, strarr);
 
 	if(var == NULL) {
 		*status = ERROR_REDIM; /* ASDF */
@@ -277,7 +302,7 @@ int setint(char *ident, char *exp, int *status) {
 	if(var) {
 		var->val.integer = i;
 	} else {
-		var = mknewvar(ident, i, NULL, 0);
+		var = mknewvar(ident, 0, i, NULL, 0, integer);
 		if(var == NULL)
 			*status = ERROR_REDIM; /* ASDF */
 		addtovarlist(var);
@@ -363,7 +388,113 @@ int dimint(char *ident, int size, int *status) {
 		return 0;
 	}
 
-	var = mknewvar(ident, 0, NULL, size);
+	var = mknewvar(ident, 0, 0, NULL, size, intarr);
+	if(!var) {
+		*status = ERROR_MALLC;
+		return 0;
+	}
+	addtovarlist(var);
+
+	*status = ERROR_NONE;
+	return 1;
+}
+
+float setdec(char *ident, char *exp, int *status) {
+	float i;
+	varentry_t *var = lookupvar(ident, decimal);
+
+	*status = ERROR_NONE;
+	i = eval(exp, status);	
+	if(var) {
+		var->val.decimal = i;
+	} else {
+		var = mknewvar(ident, i, 0, NULL, 0, decimal);
+		if(var == NULL)
+			*status = ERROR_REDIM; /* ASDF */
+		addtovarlist(var);
+	}
+
+	return var->val.decimal;
+}
+
+float setdecarr(char *arrstr, char *exp, int *status) {
+	varentry_t *var;
+	array_t arr;
+	char *ident;
+	int subs;
+	float i;
+
+	if(evalsubs(arrstr, &ident, &subs, status) == 0)
+		return 0;
+
+	if((var = lookupvar(ident, decarr)) == NULL) {
+		free(ident);
+		*status = ERROR_SUBST;
+		return 0;
+	}
+	free(ident);
+
+	arr = var->val.array;
+	if(arr.size < subs + 1) {
+		*status = ERROR_SUBST;
+		return 0;
+	}
+
+	i = eval(exp, status);
+	arr.val.decimal[subs] = i;
+
+	*status = ERROR_NONE;
+	return i;
+}
+
+float getdec(char *ident, int *status) {
+	varentry_t *var = lookupvar(ident, decimal);
+	float out;
+
+	*status = ERROR_NONE;
+	if(var == NULL) {		
+		out = setdec(ident, "0", status);
+	} else {
+		out = var->val.decimal;
+	}
+
+	return out;
+}
+
+float getdecarr(char *arrstr, int *status) {
+	varentry_t *var;
+	array_t arr;
+	char *ident;
+	int subs;
+
+	if(evalsubs(arrstr, &ident, &subs, status) == 0)
+		return 0;
+
+	if((var = lookupvar(ident, decarr)) == NULL) {
+		free(ident);
+		*status = ERROR_SUBST;
+		return 0;
+	}
+	free(ident);
+	
+	arr = var->val.array;
+	if(arr.size < subs + 1) {
+		*status = ERROR_SUBST;
+		return 0;
+	}
+
+	*status = ERROR_NONE;
+	return arr.val.decimal[subs];
+}
+
+int dimdec(char *ident, int size, int *status) {
+	varentry_t *var = lookupvar(ident, decarr);
+	if(var) {
+		*status = ERROR_REDIM;
+		return 0;
+	}
+
+	var = mknewvar(ident, 0, 0, NULL, size, decarr);
 	if(!var) {
 		*status = ERROR_MALLC;
 		return 0;

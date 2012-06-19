@@ -28,6 +28,8 @@ void exec(char *cmd) {
 			type = getvartype(var);
 			if(type == integer)
 				dimint(var, atoi(buf), &status);
+			else if(type == decimal)
+				dimdec(var, atoi(buf), &status);
 			else if(type == string)
 				dimstr(var, atoi(buf), &status);
 			else
@@ -52,6 +54,10 @@ void exec(char *cmd) {
 				setintarr(var, buf, &status);
 			else if(type == integer)
 				setint(var, buf, &status);
+			else if(type == decarr)
+				setdecarr(var, buf, &status);
+			else if(type == decimal)
+				setdec(var, buf, &status);
 			else if(type == strarr)
 				setstrarr(var, buf, &status);
 			else if(type == string)
@@ -72,7 +78,7 @@ void exec(char *cmd) {
 		else if(type == string)
 			printf(" %s\n", getstr(cmd, &status));
 		else 
-			printf(" %d\n", eval(cmd, &status));
+			printf(" %g\n", eval(cmd, &status));
 	}
 
 	printstatus(status);

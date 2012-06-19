@@ -5,8 +5,9 @@ BIN=bin
 
 CC=gcc
 CFLAGS=-I$(INC) -ggdb -O0 -Wall -pedantic -ansi -Wextra -fno-omit-frame-pointer
+#CFLAGS=-I$(INC) -ggdb -O0
 
-$(BIN)/int: $(OBJ)/help.o $(OBJ)/eval.o $(OBJ)/var.o $(SRC)/int.c
+$(BIN)/int: $(OBJ)/oper.o $(OBJ)/help.o $(OBJ)/eval.o $(OBJ)/var.o $(SRC)/int.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 $(OBJ)/eval.o: $(SRC)/eval.c

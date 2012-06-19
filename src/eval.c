@@ -10,7 +10,7 @@
 #include "oper.h"
 #include "var.h"
 
-static expr_t *makenum(int i) {
+static expr_t *makenum(float i) {
 	expr_t *out = malloc(sizeof(expr_t));
 
 	if(out == NULL)
@@ -32,7 +32,7 @@ static expr_t *makeoper(int op, expr_t *left, expr_t *right) {
 	out->left = left;
 	out->right = right;
 	out->type = oper;
-	out->val = op;
+	out->oper = op;
 
 	return out;
 }
@@ -113,17 +113,28 @@ static expr_t *buildtree(char *exp, int *status) {
 	int opr, oprpos;
 	char *left, *right;
 	expr_t *tree_left, *tree_right;
-	expr_t *out = NULL;
+	expr_t *out = NULL;	
+	vartype_t type = getvartype(exp);
 
 	*status = ERROR_NONE;
 		
 	if(isint(exp))
 		out = makenum(atoi(exp));
-	else if(isscalar(getvartype(exp)))
-		out = makenum(getint(exp, status));
-	else if(isarray(getvartype(exp)))
-		out = makenum(getintarr(exp, status));
-	if(*status != ERROR_NONE)
+	else if(isdec(exp))
+		out = makenum(strtod(exp, NULL));
+	else if(isscalar(type)) {
+		if(type == decimal) {
+			out = makenum(getdec(exp, status));
+		} else {
+			out = makenum(getint(exp, status));
+		}
+	} else if(isarray(type)) {
+		if(type == decarr) {
+			out = makenum(getdecarr(exp, status));
+		} else {
+			out = makenum(getintarr(exp, status));
+		}
+	} if(*status != ERROR_NONE)
 			return NULL; 
 	if(out)
 		return out;
@@ -158,8 +169,8 @@ static expr_t *buildtree(char *exp, int *status) {
 	}
 }
 
-static int evaltree(expr_t *tree, int *status) {
-	int left, right;
+static float evaltree(expr_t *tree, int *status) {
+	float left, right;
 
 	*status = ERROR_NONE;
 	if(tree->type == number)
@@ -167,22 +178,24 @@ static int evaltree(expr_t *tree, int *status) {
 
 	left = evaltree(tree->left, status);
 	right = evaltree(tree->right, status);
-	switch(tree->val) {
+
+	switch(tree->oper) {
 		case OPER_ADD: return left + right;
 		case OPER_SUB: return left - right;
 		case OPER_MUL: return left * right;
-		case OPER_AND: return left & right;
-		case OPER_XOR: return left ^ right;
-		case OPER_OR:  return left | right;
+		case OPER_AND: return (float)((int)left & (int)right);
+		case OPER_XOR: return (float)((int)left ^ (int)right);
+		case OPER_OR:  return (float)((int)left | (int)right);
 		case OPER_DIV:
 		case OPER_MOD:
 			if(right != 0) {
-				if(tree->val == OPER_DIV)
+				if(tree->oper == OPER_DIV)
 					return left / right;
-				else if(tree->val == OPER_MOD)
-					return left % right;
+				else if(tree->oper == OPER_MOD)
+					return (float)((int)left % (int)right);
 			} else
 				*status = ERROR_DIVZE;
+			break;
 		default: *status = ERROR_SYNTX; return 0;
 	}
 }
@@ -195,7 +208,7 @@ static void freetree(expr_t *tree) {
 	free(tree);
 }
 
-static int evalparen(char* exp, int** result, int** pos, int** len, int *status) {
+static float evalparen(char* exp, float** result, int** pos, int** len, int *status) {
 	int i, j, n, nest;
 	char *subexp;
 
@@ -272,8 +285,8 @@ static int evalparen(char* exp, int** result, int** pos, int** len, int *status)
 		if((*len)[i] > 2) {
 			for(j = 1; j < (*len)[i] - 1; j++)
 				subexp[j - 1] = exp[(*pos)[i] + j];
-			subexp[(*len)[i] - 2] = '\0';			
-
+			subexp[(*len)[i] - 2] = '\0';
+			
 			(*result)[i] = eval(subexp, status);			
 		} else
 			(*result)[i] = 0;
@@ -283,11 +296,11 @@ static int evalparen(char* exp, int** result, int** pos, int** len, int *status)
 	return n;
 }
 
-static char *buildnewexp(char* exp, int num, int* result, int* pos, int* len, int* status) {
+static char *buildnewexp(char* exp, int num, float* result, int* pos, int* len, int* status) {
 	char *out;
 	int i, newlen, n;
 	
-	newlen = (num * 10) + strlen(exp) + 1;
+	newlen = (num * 11) + strlen(exp) + 1;
 
 	for(i = 0; i < num; i++) {
 		newlen -= len[i];
@@ -302,7 +315,7 @@ static char *buildnewexp(char* exp, int num, int* result, int* pos, int* len, in
 	n = 0;
 	for(i = 0; i < strlen(exp); i++) {
 		if(i == pos[n]) {
-			sprintf(out, "%s%d", out, result[n]);
+			sprintf(out, "%s%f", out, result[n]);
 			i += len[n] - 1;
 			if(n < (num - 1))
 				n++;
@@ -313,13 +326,13 @@ static char *buildnewexp(char* exp, int num, int* result, int* pos, int* len, in
 	return out;
 }
 
-int eval(char *exp, int *status) {
+float eval(char *exp, int *status) {
 	expr_t *exptree;
 	char *buf, *buf2;
-	int ret = 0;
+	float ret = 0;
 
-	int numpar;
-	int *resultpar, *pospar, *lenpar;
+	int numpar, *pospar, *lenpar;
+	float *resultpar;
 
 	if((buf = delwhite(exp)) == NULL) {
 		*status = ERROR_MALLC;
@@ -353,4 +366,3 @@ int eval(char *exp, int *status) {
 
 	return ret;
 }
-

@@ -26,6 +26,7 @@ typedef struct varentry_t {
 
 	union {
 		int integer;
+		float decimal;
 		char *string;
 		array_t array;
 	} val;
@@ -44,6 +45,12 @@ int setintarr(char *ident, char *exp, int *status);
 int getint(char *ident, int *status);
 int getintarr(char *ident, int *status);
 int dimint(char *ident, int size, int *status);
+
+float setdec(char *ident, char *exp, int *status);
+float setdecarr(char *ident, char *exp, int *status);
+float getdec(char *ident, int *status);
+float getdecarr(char *ident, int *status);
+int dimdec(char *ident, int size, int *status);
 
 void freevarlist(void);
 #define newvarlist() (varlist = NULL)

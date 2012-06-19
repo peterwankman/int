@@ -13,7 +13,7 @@ vartype_t getvartype(char *var) {
 
 	for(i = 0; i < strlen(var) - 1; i++) {
 		if((i > 0) && (var[i] == '(') && isalpha(var[i - 1]))
-			return intarr;
+			return decarr;
 		if((var[i] == '%') && (var[i + 1] == '('))
 			return intarr;
 		if((var[i] == '$') && (var[i + 1] == '('))
@@ -24,8 +24,10 @@ vartype_t getvartype(char *var) {
 
 	if(c == '$')
 		return string;
-	else if(isalpha(c) || (c == '%'))
+	else if(c == '%')
 		return integer;
+	else if(isalpha(c))
+		return decimal;
 	else
 		return err;
 }

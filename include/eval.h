@@ -7,11 +7,12 @@ typedef enum {
 
 typedef struct expr_t {
 	exptype_t type;
-	int val;
+	int oper;
+	float val;
 	struct expr_t *left;
 	struct expr_t *right;
 } expr_t;
 
-int eval(char *exp, int *status);
+float eval(char *exp, int *status);
 
 #endif
