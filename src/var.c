@@ -130,7 +130,7 @@ static varentry_t *mknewvar(char *ident, float dval, int ival, char *str, int si
 			out->val.array.type = decimal;
 			out->val.array.size = size;
 
-			if((out->val.array.val.decimal = malloc(size * sizeof(int))) == NULL) {
+			if((out->val.array.val.decimal = malloc(size * sizeof(float))) == NULL) {
 				free(out);
 				return NULL;
 			}
@@ -518,9 +518,11 @@ int dimdec(char *ident, int size, int *status) {
 
 static void freearr(array_t arr) {
 	int i;
-	if(arr.type == integer) {
+	if(arr.type == integer)
 		free(arr.val.integer);
-	} else {
+	else if(arr.type == decimal)
+		free(arr.val.decimal);
+	else {
 		for(i = 0; i < arr.size; i++) {
 			free(arr.val.string[i]);
 		}

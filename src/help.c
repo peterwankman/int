@@ -19,28 +19,68 @@
 #include "var.h"
 
 vartype_t getvartype(char *var) {
-	int i;
-	char c = var[strlen(var) - 1];
+	int i = 0, skip = 0, ident = 0, array = 0;
+	char c, suff = '\0';
 
-	for(i = 0; i < strlen(var) - 1; i++) {
-		if((i > 0) && (var[i] == '(') && isalpha(var[i - 1]))
-			return decarr;
-		if((var[i] == '%') && (var[i + 1] == '('))
-			return intarr;
-		if((var[i] == '$') && (var[i + 1] == '('))
-			return strarr;
-		if(!isalpha(var[i]))
+	do {
+		c = var[i];
+		if((c == '%') || (c == '$')) {
+			if(i == 0)
+				return err;
+			ident = 1;
+			suff = c;
+		}
+		if(c == '(') {
+			if(i == 0)
+				return err;
+			ident = 1;
+			i--;
+		}
+		if((ident == 0) && ((c < 'A') || (c > 'Z'))) {
 			return err;
-	}
+		}
+		if(i == strlen(var) - 1) {
+			ident = 1;
+		}
+		i++;
+	} while(ident == 0);
 
-	if(c == '$')
-		return string;
-	else if(c == '%')
-		return integer;
-	else if(isalpha(c))
-		return decimal;
-	else
+	c = var[i];
+	if(c == '(') {
+		array = 1;
+		do {
+			c = var[i];
+			if(c == '(')
+				skip++;
+			if(c == ')')
+				skip--;
+			i++;
+		} while(skip && (i < strlen(var)));
+	}
+	if(skip)
 		return err;
+	if(i < strlen(var))
+		return err;
+
+	if(suff == '$')
+		if(array)
+			return strarr;
+	 	else	
+			return string;
+
+	if(suff == '%')
+		if(array)
+			return intarr;
+		else
+			return integer;
+
+	if(suff == '\0')
+		if(array)
+			return decarr;
+		else
+			return decimal;
+
+	return err;
 }
 
 int isoper(char c) {
