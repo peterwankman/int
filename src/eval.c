@@ -136,12 +136,18 @@ static expr_t *buildtree(char *exp, int *status) {
 	else if(isscalar(type)) {
 		if(type == decimal) {
 			out = makenum(getdec(exp, status));
+		} else if(type == string) {
+			out = 0;
+			*status = ERROR_TYPE; 
 		} else {
 			out = makenum(getint(exp, status));
 		}
 	} else if(isarray(type)) {
 		if(type == decarr) {
 			out = makenum(getdecarr(exp, status));
+		} else if(type == strarr) {
+			out = 0;
+			*status = ERROR_TYPE;
 		} else {
 			out = makenum(getintarr(exp, status));
 		}
